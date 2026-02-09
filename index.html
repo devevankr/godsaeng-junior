@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GodSaeng Junior - 10 Personas Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+        .insta-card { background: #ffffff; border-radius: 2.5rem; border: 1px solid #e2e8f0; }
+        input[type="radio"]:checked + label { background-color: #0f172a; color: #ffffff; border-color: #0f172a; }
+        #captureArea { background: white; padding: 24px; border-radius: 40px; }
+    </style>
+</head>
+<body class="py-12 px-4 flex flex-col items-center">
+
+    <div class="max-w-md w-full">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-black text-slate-900 mb-2">갓생 주니어 도감</h1>
+            <p id="subHeader" class="text-slate-500 text-sm font-medium">데이터 정밀 분석 프로토타입</p>
+        </header>
+
+        <div id="inputForm" class="bg-white p-8 rounded-[2rem] shadow-sm mb-8">
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 ml-1">아이 이름</label>
+                    <input type="text" id="name" placeholder="이름을 입력하세요" class="w-full px-5 py-3 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-slate-900 mt-1">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 ml-1">키(cm) <span class="text-blue-500 font-black">표준: 95</span></label>
+                        <input type="number" id="h" value="95" class="w-full px-5 py-3 bg-slate-50 rounded-2xl outline-none font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 ml-1">몸무게(kg) <span class="text-blue-500 font-black">표준: 14</span></label>
+                        <input type="number" id="w" value="14" class="w-full px-5 py-3 bg-slate-50 rounded-2xl outline-none font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 mb-3 block ml-1 uppercase">관찰된 성향 (하나 선택)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="radio" name="trait" id="eat" value="eat" class="hidden" checked><label for="eat" class="text-[11px] font-bold p-3 border rounded-xl text-center cursor-pointer">🍕 식사 고수</label>
+                        <input type="radio" name="trait" id="active" value="active" class="hidden"><label for="active" class="text-[11px] font-bold p-3 border rounded-xl text-center cursor-pointer">⚡ 에너자이저</label>
+                        <input type="radio" name="trait" id="smart" value="smart" class="hidden"><label for="smart" class="text-[11px] font-bold p-3 border rounded-xl text-center cursor-pointer">🎓 꼬마 교수님</label>
+                        <input type="radio" name="trait" id="calm" value="calm" class="hidden"><label for="calm" class="text-[11px] font-bold p-3 border rounded-xl text-center cursor-pointer">🧘 꿀잠 선비</label>
+                        <input type="radio" name="trait" id="art" value="art" class="hidden"><label for="art" class="text-[11px] font-bold p-3 border rounded-xl text-center cursor-pointer">🎨 예술가형</label>
+                        <input type="radio" name="trait" id="social" value="social" class="hidden"><label for="social" class="text-[11px] font-bold p-3 border rounded-xl text-center cursor-pointer">😊 인싸형</label>
+                    </div>
+                </div>
+                <button onclick="analyzeData()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-slate-800 transition-all">진단 시작하기</button>
+            </div>
+        </div>
+
+        <div id="resultArea" class="hidden space-y-4">
+            <div id="captureArea" class="insta-card overflow-hidden">
+                <div id="visualBox" class="aspect-square rounded-[2rem] mb-6 flex flex-col items-center justify-center relative transition-all duration-700">
+                    <div id="personaIcon" class="text-[110px] mb-2 drop-shadow-md"></div>
+                    <div id="tagContainer" class="flex flex-wrap justify-center gap-2 px-4"></div>
+                </div>
+                <div class="px-2 text-center">
+                    <p id="analysisSummary" class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]"></p>
+                    <h2 id="personaTitle" class="text-2xl font-black text-slate-900 mb-6"></h2>
+                    <div class="text-left bg-slate-50 p-5 rounded-[1.8rem] border border-slate-100 mb-4">
+                        <p id="guideText" class="text-[13px] leading-relaxed text-slate-600 font-medium"></p>
+                    </div>
+                    <p class="text-[9px] text-slate-300 font-bold mb-2 uppercase"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3" id="shareButtons">
+                <button onclick="downloadCard()" class="bg-white border-2 border-slate-900 text-slate-900 font-bold py-4 rounded-2xl">📥 이미지 저장</button>
+                <button onclick="shareLink()" class="bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg">🔗 링크 공유</button>
+            </div>
+            <button onclick="location.href=window.location.pathname" class="w-full text-slate-400 text-xs font-bold py-4">새로 진단하기</button>
+        </div>
+    </div>
+
+    <script>
+        const personas = {
+            physical: { title: "피지컬 완성형 모델", icon: "🦒", color: "bg-indigo-50", summary: "신장 상위 5% 압도적 피지컬", tags: ["#기럭지천재", "#비율깡패"], guide: "성장이 눈에 띄게 빠릅니다. 활동량이 많아지니 <b>무릎 보호대</b>와 <b>활동형 의류</b>를 챙겨주세요." },
+            mochi: { title: "말랑말랑 볼살 요정", icon: "🥯", color: "bg-orange-50", summary: "BMI 수치 기반 고영양 상태", tags: ["#완밥대장", "#볼살부자"], guide: "영양 섭취가 훌륭합니다! <b>자기주도 식기</b>와 <b>고보습 크림</b>을 추천드려요." },
+            gourmet: { title: "효율 100% 미식가", icon: "🍗", color: "bg-rose-50", summary: "높은 대사량과 미식가 기질", tags: ["#먹어도슬림", "#미식가꿈나무"], guide: "잘 먹지만 활동량이 더 많군요. <b>고단백 영양 간식</b>으로 에너지를 보충해주세요." },
+            chili: { title: "작은 고추 매운 에너자이저", icon: "🌶️", color: "bg-red-50", summary: "체구 대비 폭발적 활동성", tags: ["#작지만단단", "#무한체력"], guide: "작은 몸에 에너지가 가득합니다! <b>안전한 헬멧</b>과 <b>밸런스 바이크</b>가 필요해요." },
+            active: { title: "육아퇴근 브레이커", icon: "⚡", color: "bg-yellow-50", summary: "고활동성 행동 패턴 감지", tags: ["#에너자이저", "#엄마미안"], guide: "에너지가 넘칩니다! <b>트램펄린 키즈카페</b>에서 에너지를 발산시켜주세요." },
+            smart: { title: "세상 궁금한 꼬마 교수님", icon: "🎓", color: "bg-blue-50", summary: "인지 발달 및 호기심 집중", tags: ["#물음표살인마", "#집중력대장"], guide: "호기심이 폭발 중입니다. <b>에듀테크 교구</b>와 <b>어린이 박물관</b> 나들이가 제격입니다." },
+            calm: { title: "인생 2회차 선비", icon: "🧘", color: "bg-emerald-50", summary: "안정적 기질과 수면 데이터", tags: ["#꿀잠장인", "#평화주의자"], guide: "차분하고 순한 아이네요. <b>정서 발달용 오디오북</b>과 <b>포근한 침구</b>를 추천해요." },
+            art: { title: "섬세한 꼬마 아티스트", icon: "🎨", color: "bg-purple-50", summary: "소근육 및 감각 처리 능력 우수", tags: ["#색감천재", "#예술혼"], guide: "감각이 섬세합니다. <b>무독성 클레이</b>와 <b>드로잉 매트</b>로 창의력을 키워주세요." },
+            social: { title: "인싸력 만렙 동네 반장", icon: "😊", color: "bg-pink-50", summary: "상호작용 및 공감 지수 상위", tags: ["#미소천사", "#인싸베이비"], guide: "사람을 좋아하는 인싸형 아이! <b>가족형 키즈 펜션</b>에서 친구들과 놀게 해주세요." },
+            rookie: { title: "루틴형 갓생 유망주", icon: "🌱", color: "bg-slate-50", summary: "균형 잡힌 골든 성장 지표", tags: ["#무럭무럭", "#갓생입문"], guide: "가장 안정적인 성장 단계입니다. <b>기록용 포토 앨범</b>으로 이 순간을 남겨보세요." }
+        };
+
+        function analyzeData() {
+            const name = document.getElementById('name').value || '주니어';
+            const h = parseFloat(document.getElementById('h').value);
+            const w = parseFloat(document.getElementById('w').value);
+            const trait = document.querySelector('input[name="trait"]:checked').value;
+            
+            const bmi = w / ((h/100) * (h/100));
+            const standardH = 95;
+            let res;
+
+            // 10가지 정밀 매칭 로직
+            if (h > standardH + 7) res = personas.physical;
+            else if (bmi > 18 && trait === 'eat') res = personas.mochi;
+            else if (bmi < 14 && trait === 'eat') res = personas.gourmet;
+            else if (h < standardH - 3 && trait === 'active') res = personas.chili;
+            else if (trait === 'active') res = personas.active;
+            else if (trait === 'smart') res = personas.smart;
+            else if (trait === 'calm') res = personas.calm;
+            else if (trait === 'art') res = personas.art;
+            else if (trait === 'social') res = personas.social;
+            else res = personas.rookie;
+
+            // UI 렌더링
+            document.getElementById('inputForm').classList.add('hidden');
+            document.getElementById('resultArea').classList.remove('hidden');
+            document.getElementById('personaTitle').innerText = `${name}는 '${res.title}'`;
+            document.getElementById('personaIcon').innerText = res.icon;
+            document.getElementById('analysisSummary').innerText = res.summary;
+            document.getElementById('visualBox').className = `aspect-square rounded-[2rem] mb-6 flex flex-col items-center justify-center relative ${res.color}`;
+            document.getElementById('guideText').innerHTML = res.guide;
+
+            const tagContainer = document.getElementById('tagContainer');
+            tagContainer.innerHTML = '';
+            res.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = "bg-white px-3 py-1 rounded-full text-[10px] font-black shadow-sm text-slate-800 border border-slate-100";
+                span.innerText = tag;
+                tagContainer.appendChild(span);
+            });
+        }
+
+        async function shareLink() {
+            const url = new URL(window.location.href);
+            url.searchParams.set('name', document.getElementById('name').value);
+            url.searchParams.set('h', document.getElementById('h').value);
+            url.searchParams.set('w', document.getElementById('w').value);
+            url.searchParams.set('trait', document.querySelector('input[name="trait"]:checked').value);
+
+            if (navigator.share) {
+                await navigator.share({ title: '갓생 주니어 진단 결과', url: url.href });
+            } else {
+                await navigator.clipboard.writeText(url.href);
+                alert('링크가 복사되었습니다!');
+            }
+        }
+
+        function downloadCard() {
+            html2canvas(document.getElementById('captureArea'), { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Junior_Card.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('name')) {
+                document.getElementById('name').value = params.get('name');
+                document.getElementById('h').value = params.get('h');
+                document.getElementById('w').value = params.get('w');
+                const t = params.get('trait');
+                if(document.getElementById(t)) document.getElementById(t).checked = true;
+                analyzeData();
+            }
+        }
+    </script>
+</body>
+</html>
